@@ -179,3 +179,5 @@ https://blog.waya.ai/deep-residual-learning-9610bb62c355
 http://adventuresinmachinelearning.com/word2vec-tutorial-tensorflow/ for reference
 
  - goes over simple contextual word learning through RNN using tensorflow
+
+https://ahmedbesbes.com/how-to-mine-newsfeed-data-and-extract-interactive-insights-in-python.html
