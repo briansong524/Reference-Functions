@@ -34,6 +34,11 @@ Functions will be stored accordingly to its functionality:
  - Specifying Graphics Card (SGC)
  
    - self explanatory really
+   
+ - Decorator for printing time (DPT)
+   
+   - a decorator function to print out time. just write @my_timer on the line above any method/class you want time taken to run 
+     to be printed
 
 ## Tensorflow specific general functions ##
 
