@@ -165,9 +165,9 @@ Functions will be stored accordingly to its functionality:
    - nice visual showing how accurate the classification model is doing
 
 
-##########################
+
 ## Links I found useful ##
-##########################
+
 
 https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/04_Save_Restore.ipynb
 
