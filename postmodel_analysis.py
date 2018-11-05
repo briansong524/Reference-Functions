@@ -21,7 +21,7 @@ plt.show()
 
 
 
-### Get a complete(-ish) summary of the confusion matrix ### 
+### Get a complete(-ish) summary of the confusion matrix (COMPCM) ### 
 
 from sklearn.metrics import confusion_matrix
 import pandas as pd
