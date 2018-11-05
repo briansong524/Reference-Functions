@@ -39,6 +39,12 @@ Functions will be stored accordingly to its functionality:
    
    - a decorator function to print out time. just write @my_timer on the line above any method/class you want time taken to run 
      to be printed
+     
+ - Timer class for efficiently getting checkpoint times (CHKTIME)
+ 
+   -  grabbing different times at checkpoints of a script.
+   -  just stick a bunch of these throughout a list of scripts. This can be easily searched/deleted after being done with this. 
+Replace all the prints with logs if you would like to have it logged somewhere.
 
 ## Tensorflow specific general functions ##
 
@@ -164,7 +170,11 @@ Functions will be stored accordingly to its functionality:
  
    - nice visual showing how accurate the classification model is doing
 
-
+ - Get a complete(-ish) summary of the confusion matrix (COMPCM)
+ 
+   - Mimic the confusionMatrix library in R where it prints out all the measures (Accuracy, Specificity, etc.)
+   
+   - Remeber to grab AUC separately, as that requires predicted probabilities
 
 ## Links I found useful ##
 
