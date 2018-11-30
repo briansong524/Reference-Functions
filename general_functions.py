@@ -31,38 +31,35 @@ import time
 class my_timer:
 	def __init__(self):
 		self.start_time = time.time()
-		self.reset_time = self.start_time
+		self.reset_time = time.time()
 
 	def print_reset(self, some_str):
 		# some_str to printout note: 'time to (some_str)' i.e. "time to run some_function()"
 		
 		tot_time = time.time() - self.reset_time
 
-		if tot_time < 120:
-			print('time to ' + some_str + ': ' + str(round(tot_time,2)) + ' seconds.')
-		else:
-			print('time to ' + some_str + ': ' + str(round(tot_time / 60.0,2)) + ' minutes.')	
-
-
+		m, s = divmod(tot_time, 60)
+		h, m = divmod(m, 60)
+		h, m, s = map(int, (h, m, s))
+		print('time to ' + some_str + ': ' + str(h) + ' hour(s) ' + str(m) + ' minute(s) ' + str(s) + ' second(s).')	
 		self.reset_time = time.time()
 
 	def time_from_init(self):
 		# get the total time from when this class was initiated 
 
 		tot_time = time.time() - self.start_time
-		if tot_time < 120:
-			print('total time since starting time: ' + str(round(tot_time,2)) + ' seconds.')
-		else:
-			print('total time since starting time: ' + str(round(tot_time / 60.0,2)) + ' minutes.')
 
+		m, s = divmod(tot_time, 60)
+		h, m = divmod(m, 60)
+		h, m, s = map(int, (h, m, s))
+		print('total time since starting time: ' + str(h) + ' hour(s) ' + str(m) + ' minute(s) ' + str(s) + ' second(s).')
 
 ## Example of use
 
 # timer = my_timer()
 # time.sleep(1)
-# timer.print_reset('wait one second later') # returns "time to wait one second later: 1.0 seconds."
+# timer.print_reset('wait one second later') # returns "time to wait one second later: 0 hour(s) 0 minute(s) 1 second(s)."
 # time.sleep(3)
-# timer.print_reset('wait three seconds later') # returns "time to wait three seconds later: 3.0 seconds."
+# timer.print_reset('wait three seconds later') # returns "time to wait three seconds later: 0 hour(s) 0 minute(s) 3 second(s)."
 # time.sleep(1)
-# timer.time_from_init() # returns "total time since starting time: 5.0 seconds."
-
+# timer.time_from_init() # returns "total time since starting time: 0 hour(s) 0 minute(s) 5 second(s)."
