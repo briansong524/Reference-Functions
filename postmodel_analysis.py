@@ -31,6 +31,18 @@ Note that AUC, as important as it is, requires predicted probabilities, so run t
 made it work with it, but I'm lazy.
 PLease help where it can be improved.
 Made a class instead of a method so that each measure can be pulled out.
+
+A realistic situation in which this can be used can look something like this:
+
+lr = LogisticRegression()
+lr.fit(X,y)
+pred = lr.predict(X)
+cms = conf_mat_summary(y_true = y, y_pred = pred)
+cms.summary()
+predprob = lr.predict_proba(X) 
+auc = roc_auc_score(y,predprob[:,1])
+print('AUC of training set:' + str(round(auc,4)))
+
 '''
 
 class conf_mat_summary:
