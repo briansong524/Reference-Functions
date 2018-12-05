@@ -45,7 +45,7 @@ class conf_mat_summary:
 
 		self.error_rate  = (self.fp + self.fn) / (self.tn + self.fp + self.fn + self.tp + 0.00001)
 		self.accuracy    = (self.tp + self.tn) / (self.tn + self.fp + self.fn + self.tp + 0.00001)
-		self.sensitivity = self.tp / (self.tp + self.tn + 0.00001)
+		self.sensitivity = self.tp / (self.tp + self.fn + 0.00001)
 		self.specificity = self.tn / (self.tn + self.fp + 0.00001)
 		self.precision   = self.tp / (self.tp + self.fp + 0.00001)
 		self.fpr 		 = 1 - self.specificity
