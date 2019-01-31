@@ -106,3 +106,39 @@ class conf_mat_summary:
 # a = conf_mat_summary(y_true = true, y_pred = pred)
 # a.summary() # prints the confusion matrix + measures
 # print(' '); print('Accuracy: ' + str(a.accuracy)) # can pull individual measurements by calling the variable
+
+### random forest print feature importance ###
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.cross_validation import cross_val_score
+import seaborn as sns
+from pylab import savefig
+
+# X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size = 0.2)
+# rf = RandomForestClassifier(n_jobs = 10)
+# rf.fit(X_tr, y_tr)
+scores = cross_val_score(rf,X_tr,y_tr,cv=5)
+feat_imp = rf.feature_importances_
+var_imp = list(zip(list(X_tr),feat_imp))
+var_imp.sort(key=lambda tup: tup[1], reverse=True)
+
+sns.set_style("whitegrid")
+sns.set_color_codes("muted")
+fig = plt.figure(figsize=(15, 10))
+plt.tight_layout()
+
+sig_df = pd.DataFrame({'y':[i[0] for i in var_imp], 'x':[i[1] for i in var_imp]})
+
+ax = sns.barplot( y='y',x='x',data=sig_df)
+ax.set_title("Most important predictors in the " + 'Decision Tree' + " model")
+ax.set( ylabel='Variables',xlabel='Importance')
+counter = 0
+for p in ax.patches:
+    width = p.get_width()
+    ax.text(width  +.007 ,
+            p.get_y()+p.get_height()/2. + 0.2,
+            '{:1.3f}'.format(var_imp[counter][1]),
+            ha="center")
+    counter +=1
+ax.text(np.max(sig_df['x'])-.024,22,'Average Training Accuracy: {:1.3f}'.format(np.mean(scores)), ha='center')
