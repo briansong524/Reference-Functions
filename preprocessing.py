@@ -41,3 +41,30 @@ def mult_cat_col(df_append_to, df_cat_from, df_append_to_index_col, df_cat_from_
         new_cols = make_col_from_cat(df_cat_from, df_cat_from_index_col, cat_col)
         df_append_to = append_pd_cols(df_append_to, df_append_to_index_col, new_cols)
     return df_append_to
+  
+### make pandas columns from numerical variables (mknumcol) ###
+'''
+- Get the max/min/mean/sum of a numeric column from data containing multiple rows per index
+- Currently set up to only impute with mean (can be adjusted simply)
+- Use "append_pd_cols" defined above (within section mkcatcol) to append values to main dataframe used for training
+'''
+
+def make_col_from_num(df, index_col, col, name_split = ' '):
+    '''
+    for numeric column, get max/min/mean/sum. 
+    '''
+    
+    # check/handle NA's
+    has_NAs = df[col].isna().sum() > 0
+    if has_NAs:
+        print('Found NA values in ' + col + '. Replacing NA values with mean: ' + str(np.mean(df[col])))
+        df[col].fillna(np.mean(df[col]), inplace = True)
+    
+    # calculate descriptive statistics
+    vals = ['max','min','mean','sum']
+    piv = df.pivot_table(index = "Account ID", values = col, aggfunc = [np.max, np.min, np.mean, np.sum])
+    col_names = list(map(lambda x: col + name_split + x, vals))
+    piv = pd.DataFrame(piv.values, index = piv.index, columns = col_names)
+    return piv
+  
+ 
