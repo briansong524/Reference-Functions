@@ -118,10 +118,12 @@ from pylab import savefig
 # X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size = 0.2)
 # rf = RandomForestClassifier(n_jobs = 10)
 # rf.fit(X_tr, y_tr)
-scores = cross_val_score(rf,X_tr,y_tr,cv=5)
+# scores = cross_val_score(rf,X_tr,y_tr,cv=5)
 feat_imp = rf.feature_importances_
 var_imp = list(zip(list(X_tr),feat_imp))
 var_imp.sort(key=lambda tup: tup[1], reverse=True)
+max_imp = var_imp[0][1]
+rel_imp = list(map(lambda x: x[1]/max_imp, var_imp))
 
 sns.set_style("whitegrid")
 sns.set_color_codes("muted")
@@ -138,7 +140,7 @@ for p in ax.patches:
     width = p.get_width()
     ax.text(width  +.007 ,
             p.get_y()+p.get_height()/2. + 0.2,
-            '{:1.3f}'.format(var_imp[counter][1]),
+            '{:1.3f} / {:1.3f}'.format(var_imp[counter][1], rel_imp[counter]),
             ha="center")
     counter +=1
 ax.text(np.max(sig_df['x'])-.024,22,'Average Training Accuracy: {:1.3f}'.format(np.mean(scores)), ha='center')
