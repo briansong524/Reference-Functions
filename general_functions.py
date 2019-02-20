@@ -100,3 +100,12 @@ class categorical_dictionary:
     def ind_to_cat(self, vals, col_name):
         return list(map(lambda x: self.rev_cat_dict[col_name][x], vals))
     
+### check memory usage by Python script (GETMEM) ###
+def check_memory():
+	process = psutil.Process(os.getpid())
+	rss = process.memory_info().rss / 1024.0 / 1024.0 # megabytes
+	sfx = 'MB'
+	if rss > 1024:
+		rss = rss / 1024.0
+		sfx = 'GB'
+	print("Current memory usage: " + str(round(rss,2)) + " " + sfx)
