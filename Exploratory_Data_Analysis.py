@@ -1,3 +1,5 @@
+### Check NA columns in a pandas dataframe (CHKNA) ###
+
 def check_na(df):
     'return pandas dataframe of description of NAs in a pandas df'
     na_count = df.isna().sum()
