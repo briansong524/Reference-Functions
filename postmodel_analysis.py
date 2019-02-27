@@ -111,7 +111,7 @@ class conf_mat_summary:
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.cross_validation import cross_val_score
+from sklearn.model_selection import cross_val_score
 import seaborn as sns
 from pylab import savefig
 
