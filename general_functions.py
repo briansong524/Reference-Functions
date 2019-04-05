@@ -100,6 +100,20 @@ class categorical_dictionary:
     def ind_to_cat(self, vals, col_name):
         return list(map(lambda x: self.rev_cat_dict[col_name][x], vals))
     
+# Example:
+#
+# df = read.csv('...') # "cat_col_1","cat_col_2","y"
+# x_cols = ['cat_col_1','cat_col_2'] # categorical columns
+# X = df[x_cols].copy()
+# y = df['y'].values
+# cat_dict = categorical_dictionary()
+# 
+# for col_ in x_cols:
+#     cat_dict.add_col(X[col_].values, col_)
+#     X[col_] = cat_dict.cat_to_ind(X[col_], col_)
+#
+# # The dataframe "X" should now be all numeric, which is now ready to be used for sklearn models or something
+
 ### check memory usage by Python script (GETMEM) ###
 def check_memory():
 	process = psutil.Process(os.getpid())
