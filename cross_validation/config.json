@@ -1,7 +1,8 @@
 {
     "base":{
         "model_type":"classification",
-        "model":"gbm"
+        "model":"gbm",
+        "k-fold":5
     },
     "rf":{
         "n_estimators":"10,50,100",

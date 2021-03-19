@@ -68,9 +68,9 @@ least min_samples_leaf training samples in each of the left and right
 branches. This may have the effect of smoothing the model, especially in 
 regression.
 
-If int, then consider min_samples_leaf as the minimum number.
+* If int, then consider min_samples_leaf as the minimum number.
 
-If float, then min_samples_leaf is a fraction and ceil(min_samples_leaf * 
+* If float, then min_samples_leaf is a fraction and ceil(min_samples_leaf * 
 n_samples) are the minimum number of samples for each node.
 
 ### Within gbm configs

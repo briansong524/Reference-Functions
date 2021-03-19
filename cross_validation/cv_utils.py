@@ -1,13 +1,24 @@
-def cv():
+""" Utility Functions
+All the necessary methods that are used to run the grid search k-fold 
+cross validation. These methods are compartmentalized to different steps for
+easier modifications.
+"""
 
-    ## data manipulation
 
-    ## setup train data
-    # define 'label' as y, everything else as x
-
-    train_df
-
-    ## setup cross validation parameters
+def cv(inputs):
+    # The series of steps involved in a grid search k-fold cross validation
+    
+    param_dict = inputs['base']
+    train_df = param_dict['train_df']
+    x_tr, y_tr = data_manipulation(train_df)
+    
+    # Setup cv
+    K = inputs['k-fold']
+    model = all_models(inputs['model_type']['model'])
+    gscv = GridSearchCV(model, 
+                        param_grid=inputs[inputs['model']],
+                        scoring=inputs['']
+                        )
 
     ## display results
 
@@ -25,11 +36,18 @@ def data_manipulation(df):
     x_names = list(set(col_names) - y_name)
 
     return df[x_names], df[y_name]
-
-def setup_cv(config):
-    # Set up the cross-validation by using the configs defined in config.json
-
-    model = all_models(config['model_type'], config['model'])
     
 def all_models(model_type, model):
     # defining which model is being called here
+    model_dict = {
+        'classification':{
+            'rf':RandomForestClassifier(),
+            'gbm':LGBMClassifier()
+        },
+        'regression':{
+            'rf':RandomForestRegressor(),
+            'gbm':LGBMRegressor()
+        }
+
+    }
+    return model_dict[model_type][model]
