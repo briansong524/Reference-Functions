@@ -1,4 +1,20 @@
 {
-    
-    
+    "base":{
+        "model_type":"classification",
+        "model":"gbm"
+    },
+    "rf":{
+        "n_estimators":"10,50,100",
+        "max_depth":"None,5,15,30",
+        "min_samples_split":"5,15,50",
+        "min_samples_leaf":"1,5,20"
+    },
+    "gbm":{
+        "n_estimators":"20,50,100",
+        "num_leaves":"16,32,64",
+        "max_depth":"-1,5,15,30"
+    },
+    "lr":{
+        "tbd":"tbd"
+    }
 }
