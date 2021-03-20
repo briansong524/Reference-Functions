@@ -43,7 +43,7 @@ linear/logistic regression (depending on model_type))
 
 **scoring_metric**: Define which scoring metric is used to optimize the 
 hyperparameters from. Refer to 
-https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter 
+[this](https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter) 
 for options.
 
 **label**: Define the name of the label column (that is being trained against)
