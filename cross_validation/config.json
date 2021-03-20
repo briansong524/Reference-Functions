@@ -2,7 +2,10 @@
     "base":{
         "model_type":"classification",
         "model":"gbm",
-        "k-fold":5
+        "k-fold":"5",
+        "scoring_metric":"f1",
+        "label":"target",
+        "id":"id"
     },
     "rf":{
         "n_estimators":"10,50,100",

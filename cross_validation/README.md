@@ -36,8 +36,15 @@ The keys in *config.json* is defined here
 **model_type**: Define if it is "classification" or "regression"
 
 **model**: Define which ML model will be used. (Options available: "rf" for 
-random forest, "gbm" for gradient boost machine, and **TBD** "lr" for linear/logistic 
-regression (depending on model_type))
+random forest, "gbm" for gradient boost machine, and **TBD** "lr" for 
+linear/logistic regression (depending on model_type))
+
+**k-fold**: Define the number of folds to use in the grid search
+
+**scoring_metric**: Define which scoring metric is used to optimize the 
+hyperparameters from. Refer to 
+https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter 
+for options.
 
 ### Within rf configs:
 
