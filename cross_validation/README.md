@@ -46,6 +46,12 @@ hyperparameters from. Refer to
 https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter 
 for options.
 
+**label**: Define the name of the label column (that is being trained against)
+
+**id**: Define the name of the id column. This is used to hide from the 
+training set, and also output a prediction with this column if needed 
+(e.g. expected submission for Kaggle)
+
 ### Within rf configs:
 
 Note: These are just a few of the parameters from sklearn's 
