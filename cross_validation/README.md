@@ -5,12 +5,12 @@
 This is essentially a wrapper functions to run an exhaustive grid search 
 k-fold cross validation that should generally work with any model training 
 setup. It should be able to work with any sklearn models. I would advise 
-swapping out sklearn models to something else in production, if minmaxing 
-speed/memory use, but it is probably fine 99% of the time. 
+swapping out sklearn models to something else in production if you're 
+optimizing speed/memory use, but it's probably fine 99% of the time. 
 
 ## General Functionality 
 
-Running *run.py* will take in a training set (and optionally a test set) and 
+Running *run_cv.py* will take in a training set (and optionally a test set) and 
 run an exhaustive grid search k-fold cross validation to output the best set 
 of hyperparameters. A printout of the results will be available. If a test set 
 is provided, the script will then use the best hyperparameters selected and 
@@ -21,7 +21,7 @@ as *predictions.csv*.
 
 Define the configuration settings in *config.json* and edit the functions in
 *cv_utils* as needed (most notably *data_manipulation()*). Then you can run 
-*run.py* in command line. 
+*run_cv.py* in command line. 
 
 If you are providing a test set, remember to modify the test set function 
 to have an expected output format. It is defaulted to what Kaggle generally 

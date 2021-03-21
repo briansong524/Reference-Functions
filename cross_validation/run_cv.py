@@ -15,19 +15,22 @@ from cv_utils import cv
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
-    '-train_df', type=str, default='',
-    help = 'input training file (whole directory if not in same \
+    '--config', type=str, default='config.json',
+    help = 'Configuration file')
+parser.add_argument(
+    '--train_df', type=str, default='',
+    help = 'Input training file (whole directory if not in same \
             location as script)')
 parser.add_argument(
-    '-test_df', type=str, default='',
-    help = 'input testing file (whole directory if not in same \
+    '--test_df', type=str, default='',
+    help = 'Input testing file (whole directory if not in same \
             location as script). Blank would skip outputting predictions.')
 parser.add_argument(
-    '-output_dir', type=str, default='outputs',
-    help = 'output directory for cv results')
+    '--output_dir', type=str, default='outputs',
+    help = 'Output directory for cv results')
 parser.add_argument(
-    '-save_results', type=bool, default=True,
-    help = 'save cv results to output directory')
+    '--save_results', type=bool, default=True,
+    help = 'Save cv results to output directory')
 
 FLAGS, unparsed = parser.parse_known_args()
 

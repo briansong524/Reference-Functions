@@ -7,7 +7,7 @@ easier modifications.
 """
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from lightgbm import LGBMClassifier
+from lightgbm import LGBMClassifier, LGBMRegressor
 from sklearn.model_selection import GridSearchCV
 
 def cv(inputs):
@@ -39,32 +39,6 @@ def cv(inputs):
         output.to_csv(params['output_dir'] + '/cv_predictions.csv',
                       index = False
                       )
-
-def data_manipulation(params, test_set = False):
-    # Skeleton of a standard data manipulation method. This is probably where 
-    # all the project-specific modifications should take place to maintain 
-    # consistency.    
-    
-
-    ## Write any data aggregation/modification here ##
-
-    pass
-
-    ## Separating predictors and label, removing id column, if any
-
-    y_name = params['label']
-    id_name = params['id']
-
-    if test_set:
-        df = params['test_df']
-        y = ''
-    else:
-        df = params['train_df']
-        y = df[y_name]
-    col_names = list(df)
-    x_names = list(set(col_names) - y_name - id_name)
-    return df[x_names], y
-
     
 def all_models(model_type, model):
     # Defining which model is being called here. Can easily modify/add more 
@@ -97,3 +71,31 @@ def cv_results(gscv, params):
         with open(params['output_dir'] + '/cv_results.txt','w') as out_:
             out_.write(results)
 
+def data_manipulation(params, test_set = False):
+    # Skeleton of a standard data manipulation method. This is probably where 
+    # all the project-specific modifications should take place to maintain 
+    # consistency.    
+    
+
+
+    ## Separating predictors and label, removing id column, if any
+
+    y_name = params['label']
+    id_name = params['id']
+
+    if test_set:
+        df = params['test_df']
+        y = ''
+    else:
+        df = params['train_df']
+        y = df[y_name]
+
+    ## Write any data aggregation/modification here ##
+
+    pass
+
+    ## Formatting expected output
+
+    col_names = list(df)
+    x_names = list(set(col_names) - y_name - id_name)
+    return df[x_names], y
