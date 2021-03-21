@@ -6,6 +6,7 @@ set. Can output predictions if test_df is defined.
 """
 
 import os
+import json
 import datetime
 import argparse
 
@@ -35,14 +36,15 @@ parser.add_argument(
 FLAGS, unparsed = parser.parse_known_args()
 
 if __name__ == '__main__':
-    with open(config.json,r) as in_:
-        config = json.read(in_)
+    with open(FLAGS.config,'r') as in_:
+        config = json.load(in_)
 
     config['base']['train_df'] = pd.read_csv(FLAGS.train_df)
     if FLAGS.test_df != "":
         config['base']['test_df'] = pd.read_csv(FLAGS.test_df)
+        config['base']['run_pred'] = True
     else:
-        config['base']['test_df'] = ""
+        config['base']['run_pred'] = False
 
     today_dt = str(datetime.datetime.today()).split('.')[0].replace(' ','_')
     output_dir = FLAGS.output_dir + '_' + today_dt

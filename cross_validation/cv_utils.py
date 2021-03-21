@@ -15,8 +15,10 @@ def cv(inputs):
     
     params = inputs['base']
     x_tr, y_tr = data_manipulation(params)
-    K = inputs['k-fold']
-    model = all_models(inputs['model_type']['model'])
+    K = params['k-fold']
+    model = all_models(params['model_type'],
+                       params['model']
+                       )
     param_grid = inputs[params['model']]
     
     for key in param_grid.keys():
@@ -24,10 +26,11 @@ def cv(inputs):
     gscv = GridSearchCV(model, 
                         param_grid = inputs[inputs['model']],
                         scoring = params['scoring_metric'],
-                        cv = int(params['k-fold'])
+                        cv = int(params['k-fold']),
+                        verbose = 4
                         )
     gscv.fit(x_tr,y_tr)
-    cv_results(gscv)
+    cv_results(gscv, params)
     
     if params['test_df'] != "":
         print('predicting on best params')
@@ -64,8 +67,8 @@ def cv_results(gscv, params):
     results = 'Best parameters set found on development set:\n\n'
     results += str(gscv.best_params_) + '\n\n'
     results += 'Grid scores on development set:\n\n'
-    for mean, std, params in zip(means, stds, gscv.cv_results_['params']):
-        results += "%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params) + '\n'
+    for mean, std, vals in zip(means, stds, gscv.cv_results_['params']):
+        results += "%0.3f (+/-%0.03f) for %r" % (mean, std * 2, vals) + '\n'
     print(results)
     if params['save_results']:
         with open(params['output_dir'] + '/cv_results.txt','w') as out_:
@@ -97,5 +100,5 @@ def data_manipulation(params, test_set = False):
     ## Formatting expected output
 
     col_names = list(df)
-    x_names = list(set(col_names) - y_name - id_name)
+    x_names = list(set(col_names) - set([y_name, id_name]))
     return df[x_names], y
