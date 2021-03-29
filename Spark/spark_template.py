@@ -17,7 +17,7 @@ from pyspark.sql.functions import udf, col
 def spark_initiate(master = 'local', appName = 'placeholder'):
     # Initiate a new Spark Session 
     spark = SparkSession.builder \
-            .master('local') \
+            # .master('local') \
             .appName('placeholder') \
             .getOrCreate() \
             #.config('something','something')
