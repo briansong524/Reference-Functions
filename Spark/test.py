@@ -9,11 +9,11 @@ import os
 import json
 import datetime
 import argparse
-import strings
 
 import pandas as pd
 import pyspark
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
 
 from model_utils import model_structure, model_config
 
@@ -26,7 +26,8 @@ def main(config):
 
     # some data / tramsformer
     raw_data = config['base']['train_df']
-    data = load_data(spark, raw_data, 'df')
+    structure_schema = model_structure()
+    data = load_data(spark, raw_data, 'df', structure_schema)
 
     df, cat_dict = transformer(data)
     df.show()
@@ -84,10 +85,11 @@ def transformer(df, cat_dict={}):
 
     df = df.withColumn('Title', 
                        df.Cabin.map(
-                                   lambda x: substrings_in_string(x,
-                                                                  title_list
-                                                                  )
-                                   )
+                                   lambda x: 
+                                        substrings_in_string(x,
+                                                          title_list
+                                                          )
+                                   )            
                        )
     df = df.withColumn('Title', df.Title.map(replace_titles))
     df = df.withColumn('Deck', 
@@ -104,19 +106,19 @@ def transformer(df, cat_dict={}):
 
     if 'Sex' not in cat_dict.keys():
         # replace with index, save indexer
-
+        pass
     if 'Embarked':
         # replace with index, save indexer
-
+        pass
     df = df.drop('PassengerId','Name','Ticket','Cabin')
 
     return df
 
 def substrings_in_string(big_string, substrings):
     for substring in substrings:
-        if string.find(big_string, substring) != -1:
+        if substring in big_string:
             return substring
-    print big_string
+    # print big_string
     return np.nan
 
 def replace_titles(title):

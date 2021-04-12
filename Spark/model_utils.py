@@ -9,7 +9,7 @@ def model_structure():
                             StructField('Pclass',IntegerType(),True),
                             StructField('Name',StringType(),True),
                             StructField('Sex',StringType(),True),
-                            StructField('Age',IntegerType(),True),
+                            StructField('Age',DoubleType(),True),
                             StructField('SibSp',IntegerType(),True),
                             StructField('Parch',IntegerType(),True),
                             StructField('Ticket',StringType(),True),
