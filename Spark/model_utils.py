@@ -15,7 +15,7 @@ def model_structure():
                             StructField('Ticket',StringType(),True),
                             StructField('Fare',DoubleType(),True),
                             StructField('Cabin',StringType(),True),
-                            StructField('Embarked',StringType(),True),
+                            StructField('Embarked',StringType(),True)
                             ])
 
     return structure_schema
