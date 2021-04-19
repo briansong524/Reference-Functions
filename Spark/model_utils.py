@@ -25,7 +25,7 @@ def model_config():
             "base":{
                 "model_type":"classification",
                 "model":"gbm",
-                "featuresCol":"features",
+                "featuresCol":"Pclass,Sex,Age,SibSp,Parch,Fare,Embarked,Title,Deck,Family_Size,Age_Class,Fare_Per_Person",
                 "labelCol":"Survived",
                 "predictionCol":"prediction",
             },

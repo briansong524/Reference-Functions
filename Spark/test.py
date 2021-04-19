@@ -11,9 +11,14 @@ import datetime
 import argparse
 
 import pandas as pd
+import numpy as np
 import pyspark
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import col, udf, lit
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.ml.classification import GBTClassifier
+from pyspark.ml.feature import VectorAssembler, StringIndexer
+
 
 from model_utils import model_structure, model_config
 
@@ -28,17 +33,33 @@ def main(config):
     raw_data = config['base']['train_df']
     structure_schema = model_structure()
     data = load_data(spark, raw_data, 'df', structure_schema)
+    # data.show()
 
     df, cat_dict = transformer(data)
-    df.show()
+    datatype_dict = dict(df.dtypes)
+    features = config['base']['featuresCol'].split(',')
+    list_str = [] # list of string columns
+    for feature in features:
+        if datatype_dict[feature] == 'string':
+            list_str.append(feature)
+            df = StringIndexer(inputCol=feature, 
+                               outputCol=feature + '_index'
+                               ) \
+                 .fit(df) \
+                 .transform(df)
+    df = df.drop(*list_str)
+    features = list(set(df.columns) - set(config['base']['labelCol']))
+    assembler = VectorAssembler(inputCols=features,
+                                outputCol='features')
+    df = assembler.transform(df)
+    # df.show()
     (trainingData, testData) = df.randomSplit([0.7, 0.3])
 
     # estimator
 
-    model = estimators(model=config['model'], 
-                       model_type=config['model_type']
-                       )
+    model = estimators(config)
     fitted_model = model.fit(df)
+    print('ended without error')
 
 def spark_initiate(master = 'local', appName = 'placeholder'):
     # Initiate a new Spark Session 
@@ -83,36 +104,44 @@ def transformer(df, cat_dict={}):
     if cat_dict == {}:
         cat_dict = categorical_dictionary()
 
+    # df = df.withColumn('Title', 
+    #                    df.Cabin.rdd.flatMap(
+    #                                lambda x: 
+    #                                     substrings_in_string(x,
+    #                                                       title_list
+    #                                                       )
+    #                                )            
+    #                    )
+    substring_udf_title = udf(lambda x: substrings_in_string(x, title_list), 
+                              StringType()
+                              )
+    replace_title_udf = udf(lambda x: replace_titles(x), StringType())
+    substring_udf_cabin = udf(lambda x: substrings_in_string(x, cabin_list), 
+                              StringType()
+                              )
     df = df.withColumn('Title', 
-                       df.Cabin.map(
-                                   lambda x: 
-                                        substrings_in_string(x,
-                                                          title_list
-                                                          )
-                                   )            
-                       )
-    df = df.withColumn('Title', df.Title.map(replace_titles))
-    df = df.withColumn('Deck', 
-                       df.Cabin.map(
-                                   lambda x: substrings_in_string(x,
-                                                                  cabin_list
-                                                                  )
-                                   )
-                       )
-    df = df.withColumn('Family_Size',df.SibSp + df.Parch)
-    df = df.withColumn('Age_Class', df.Age * df.Pclass)
-    df = df.withColumn('Fare_Per_Person', df.Fare / (df.Family_Size + 1))
-    df = df.withColumn('Sex',df.Sex)
+                       substring_udf_title(col('Name'))  
+                       ) \
+            .withColumn('Title', 
+                       replace_title_udf(col('Title'))
+                       ) \
+            .withColumn('Deck', 
+                       substring_udf_cabin(col('Cabin'))
+                       ) \
+            .withColumn('Family_Size',col('SibSp') + col('Parch')) \
+            .withColumn('Age_Class', col('Age') * col('Pclass')) \
+            .withColumn('Fare_Per_Person', col('Fare') / (col('Family_Size') + 1)) \
+            .withColumn('Sex',col('Sex')) \
+            .drop('PassengerId','Name','Ticket','Cabin')
 
-    if 'Sex' not in cat_dict.keys():
-        # replace with index, save indexer
-        pass
-    if 'Embarked':
-        # replace with index, save indexer
-        pass
-    df = df.drop('PassengerId','Name','Ticket','Cabin')
+    # if 'Sex' not in cat_dict.keys():substring_udf = udf(lambda x: substrings_in_string(x, title_list), StringType())
+    #     # replace with index, save indexer
+    #     pass
+    # if 'Embarked':
+    #     # replace with index, save indexer
+    #     pass
 
-    return df
+    return df, cat_dict
 
 def substrings_in_string(big_string, substrings):
     for substring in substrings:
@@ -128,11 +157,6 @@ def replace_titles(title):
         return 'Mrs'
     elif title in ['Mlle', 'Ms']:
         return 'Miss'
-    elif title =='Dr':
-        if x['Sex']=='Male':
-            return 'Mr'
-        else:
-            return 'Mrs'
     else:
         return title
 
@@ -158,6 +182,26 @@ def convert_word_to_ind(dataset_col,dictionary):
     #list_as_series = pd.Series(list_of_lists)
     list_as_series = np.array(list_of_lists)
     return list_as_series, unk_count
+
+def estimators(config):
+    # All models to choose amongst for simple regression/classification
+    model_type = config['base']['model_type']    
+    model = config['base']['model']
+
+    if model == 'gbm':
+        if model_type == 'classification':
+            glm = GBTClassifier(
+                        featuresCol = 'features',
+                        labelCol = config['base']['labelCol'],
+                        predictionCol = config['base']['predictionCol'],
+                        lossType = config['model']['gbm']['lossType'],
+                        maxDepth = int(config['model']['gbm']['maxDepth']),
+                        stepSize = float(config['model']['gbm']['stepSize'])
+                        )
+
+
+    return glm
+
 
 class categorical_dictionary:
     'class containing all categorical variables indexed and converted'
