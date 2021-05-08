@@ -17,8 +17,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, udf, lit
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from pyspark.ml.classification import GBTClassifier
-from pyspark.ml.feature import VectorAssembler, StringIndexer
-
+from pyspark.ml.feature import VectorAssembler, StringIndexer, Imputer
+from pyspark.mllib.evaluation import BinaryClassificationMetrics
 
 from model_utils import model_structure, model_config
 
@@ -48,18 +48,31 @@ def main(config):
                  .fit(df) \
                  .transform(df)
     df = df.drop(*list_str)
+    df.show()
     features = list(set(df.columns) - set(config['base']['labelCol']))
     assembler = VectorAssembler(inputCols=features,
                                 outputCol='features')
     df = assembler.transform(df)
-    # df.show()
     (trainingData, testData) = df.randomSplit([0.7, 0.3])
 
     # estimator
 
     model = estimators(config)
-    fitted_model = model.fit(df)
-    print('ended without error')
+    fitted_model = model.fit(trainingData)
+    testData = fitted_model.transform(testData)
+    predictionAndLabels = testData.select('probability','Survived') \
+                                  .rdd.map(lambda x: (float(x[0][0]),
+                                                      float(x[1])
+                                                      )
+                                          )
+    metrics = BinaryClassificationMetrics(predictionAndLabels)
+
+    # Area under precision-recall curve
+    print("Area under PR = %s" % metrics.areaUnderPR)
+
+    # Area under ROC curve
+    print("Area under ROC = %s" % metrics.areaUnderROC)
+
 
 def spark_initiate(master = 'local', appName = 'placeholder'):
     # Initiate a new Spark Session 
@@ -119,20 +132,27 @@ def transformer(df, cat_dict={}):
     substring_udf_cabin = udf(lambda x: substrings_in_string(x, cabin_list), 
                               StringType()
                               )
+
+    df = Imputer().setInputCols(['Age']) \
+                  .setOutputCols(['Age']) \
+                  .setStrategy('mean') \
+                  .fit(df).transform(df)
+
     df = df.withColumn('Title', 
-                       substring_udf_title(col('Name'))  
-                       ) \
-            .withColumn('Title', 
-                       replace_title_udf(col('Title'))
-                       ) \
-            .withColumn('Deck', 
-                       substring_udf_cabin(col('Cabin'))
-                       ) \
-            .withColumn('Family_Size',col('SibSp') + col('Parch')) \
-            .withColumn('Age_Class', col('Age') * col('Pclass')) \
-            .withColumn('Fare_Per_Person', col('Fare') / (col('Family_Size') + 1)) \
-            .withColumn('Sex',col('Sex')) \
-            .drop('PassengerId','Name','Ticket','Cabin')
+                      substring_udf_title(col('Name'))  
+                      ) \
+           .withColumn('Title', 
+                      replace_title_udf(col('Title'))
+                      ) \
+           .withColumn('Deck', 
+                      substring_udf_cabin(col('Cabin'))
+                      ) \
+           .withColumn('Family_Size', col('SibSp') + col('Parch')) \
+           .withColumn('Age_Class', col('Age') * col('Pclass')) \
+           .withColumn('Fare_Per_Person', col('Fare') / (col('Family_Size') + 1)) \
+           .withColumn('Sex',col('Sex')) \
+           .drop('PassengerId','Name','Ticket','Cabin')
+
 
     # if 'Sex' not in cat_dict.keys():substring_udf = udf(lambda x: substrings_in_string(x, title_list), StringType())
     #     # replace with index, save indexer
@@ -237,6 +257,55 @@ class categorical_dictionary:
         return list(map(lambda x: self.rev_cat_dict[col_name][x], vals))
     
 
+class conf_mat_summary:
+
+    def __init__(self, y_true, y_pred): #, labels = None, sample_weight = None  # i am afraid these might break the code lol.
+        self.y_true = list(y_true)
+        self.y_pred = list(y_pred)
+        self.confusion_matrix = confusion_matrix(y_true, y_pred)#, labels, sample_weight)
+        self.tn, self.fp, self.fn, self.tp = list(map(float,self.confusion_matrix.ravel()))
+
+        # Calculate the different measures (added 1e-5 at the denominator to avoid 'divide by 0')
+
+        self.error_rate  = (self.fp + self.fn) / (self.tn + self.fp + self.fn + self.tp + 0.00001)
+        self.accuracy    = (self.tp + self.tn) / (self.tn + self.fp + self.fn + self.tp + 0.00001)
+        self.sensitivity = self.tp / (self.tp + self.fn + 0.00001)
+        self.specificity = self.tn / (self.tn + self.fp + 0.00001)
+        self.precision   = self.tp / (self.tp + self.fp + 0.00001)
+        self.fpr         = 1 - self.specificity
+        self.f_score     = (2*self.precision*self.sensitivity) / (self.precision + self.sensitivity  + 0.00001)
+
+
+    def summary(self):
+
+        # gather values 
+
+        names_ = ['Accuracy','Precision/PPV','Sensitivity/TPR/Recall','Specificity/TNR','Error Rate','False Positive Rate (FPR)','F-Score']
+        values = [self.accuracy, self.precision, self.sensitivity, self.specificity, self.error_rate, self.fpr, self.f_score]
+        values = list(map(lambda x: round(x,4), values))
+        results = pd.DataFrame({'Measure':names_, 'Value':values})
+
+
+        # calculate some formatting stuff to make output nicer
+
+        set_ = set(self.y_true + self.y_pred)
+        labels = sorted(list(map(str, set_)))
+        max_len_name = max(list(map(len,list(labels))))
+        labels = list(map(lambda x: x + ' '*(max_len_name - len(x)), labels))
+        dis_bet_class = max([max_len_name, len(str(self.confusion_matrix[0][0])), len(str(self.confusion_matrix[1][0]))])
+        extra_0 = dis_bet_class - len(labels[0])
+        extra_1 = dis_bet_class - len(str(self.confusion_matrix[0][0]))
+        extra_2 = dis_bet_class - len(str(self.confusion_matrix[1][0]))
+
+        # print outputs
+
+        print(' ') # skips a line. idk, maybe it would look nicer in terminal or something
+        print(' '*(6 + max_len_name) + 'pred')
+        print(' '*(6 + max_len_name) + labels[0] + ' '*(extra_0 + dis_bet_class) + labels[1])
+        print('true ' + labels[0] + ' ' + str(self.confusion_matrix[0][0]) + ' '*(extra_1 + dis_bet_class) + str(self.confusion_matrix[0][1]))
+        print('     ' + labels[1] + ' ' + str(self.confusion_matrix[1][0]) + ' '*(extra_2 + dis_bet_class) + str(self.confusion_matrix[1][1]))
+        print(results)
+    
 
 if __name__ == '__main__':
 
